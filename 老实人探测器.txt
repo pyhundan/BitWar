@@ -1,0 +1,15 @@
+if((LATEST+1) = 0){
+	feedback 1
+}
+else {
+	i:RANDOM(10).
+	if(i>8){
+		feedback 0	
+	}
+	else {
+		i:HISTORY[LATEST].
+		feedback i
+	}
+	done
+}
+done

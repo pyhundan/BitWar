@@ -1,0 +1,17 @@
+i:1.
+k:0.
+if(LATEST < 0){
+	feedback 1
+}
+done.
+operate for(k < (LATEST+1)){
+	if(HISTORY[k] = 0){
+		i : 0.
+		k : LATEST+1
+	}
+	else {
+		k:k+1
+	}
+	done
+}
+feedback i

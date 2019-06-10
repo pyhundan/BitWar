@@ -1,0 +1,8 @@
+if ((LATEST+1) = 0){
+	feedback 1
+}
+else {
+	i:HISTORY[LATEST].
+	feedback i
+}
+done
