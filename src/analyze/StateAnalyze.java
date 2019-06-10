@@ -12,11 +12,11 @@ import java.util.LinkedList;
     文法规则：
 
     stmt_seq -> statement { ; statement }
-    statement -> if_stmt|repeat_stmt|assign_stmt |feedback_stme
+    statement -> if_stmt|repeat_stmt|assign_stmt |back_stmt
     if_stmt -> if(exp)then '{' stmt_seq'}' {else '{'stmt_seq'}'} end
-    repeat_stmt -> for(exp) '{'stmt_seq'}' end for
+    repeat_stmt -> repeat(exp) '{'stmt_seq'}' end repeat
     assign_stmt -> identifier:=exp
-    feedback_stmt -> feedback(identifier|number)
+    back_stmt -> back(identifier|number) //好像是返回语句
     exp -> simple_exp {comparison_op simple_exp}
     comparison_op -> <|=|>
     simple_exp -> term { addop term}
@@ -37,8 +37,8 @@ public class StateAnalyze {
     public Token tok;
     public int index;
     public HashMap<String,Integer> identifier;
-    public int feedback;
-    public boolean feedbackflag;
+    public int back;
+    public boolean backflag;
     //public BattleHistory battleHistory
     //public int oppenent;
 
@@ -92,8 +92,8 @@ public class StateAnalyze {
     public void start_analyse()
     {
         index=0;
-        feedbackflag=true;
-        feedback=0;
+        backflag=true;
+        back=0;
 
         try {
             tok=tokens.get(index++);
@@ -107,17 +107,47 @@ public class StateAnalyze {
     public void stmt_seq() throws CodeException
     {
         String word=tok.word;
+        if(word.equals("if")||word.equals("repeat")||word.equals("back")||word.equals("identifier"))
+        {
+            statement();
+            while (tok.word.equals(";"))
+            {
+                match(";");
+                statement();
+            }
+        }
+        else Error("stmt_seq not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
 
     }
 
     public void statement() throws CodeException
     {
+        String word=tok.word;
+
+        if (word.equals("if"))
+        {
+            if_stmt();
+        }
+        else if (word.equals("repeat"))
+        {
+            repeat_stmt();
+        }
+        else if(word.equals("back"))
+        {
+            back_stmt();
+        }
+        else if (word.equals("identifier"))
+        {
+            assign_stmt();
+        }
+        else Error("statement not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
 
     }
 
-    public void if_stmt()
+    public void if_stmt() throws CodeException
     {
-
+        match("if");
+        match("(");
     }
 
     public void repeat_stmt()
@@ -130,7 +160,7 @@ public class StateAnalyze {
 
     }
 
-    public void feedback_stmt()
+    public void back_stmt()
     {
 
     }
