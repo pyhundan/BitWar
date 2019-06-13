@@ -16,7 +16,7 @@ import java.util.LinkedList;
     if_stmt -> if(exp)then '{' stmt_seq'}' {else '{'stmt_seq'}'} end
     repeat_stmt -> repeat(exp) '{'stmt_seq'}' end repeat
     assign_stmt -> identifier:=exp
-    back_stmt -> back(identifier|number) //好像是返回语句
+    back_stmt -> back_r(identifier|number) //返回语句
     exp -> simple_exp {comparison_op simple_exp}
     comparison_op -> <|=|>
     simple_exp -> term { addop term}
@@ -219,47 +219,117 @@ public class StateAnalyze {
 
     public void assign_stmt() throws CodeException
     {
+        // assign_stmt -> identifier:=exp
+        String temp=cur.word;
+        match("identifier");
+        match(":");
+        match("=");
+        int re_turn =simple_exp();
+        identifier.put(temp,re_turn);
+
+    }
+
+    public void back_stmt() throws CodeException
+    {
+        //back_stmt -> back_r(identifier|number)
+        match("back_r");
+        if (cur.word.equals("identifier")) {
+            if (backflag) {
+                back=identifier.get(cur.word);
+                backflag=false;             
+            }
+            match("identifier");
+        }
+        else if (cur.type.equals("number")) {
+            if (backflag) {
+                back=Integer.parseInt(cur.word);
+                backflag=false;
+                
+            }
+            match("number");
             
-    }
-
-    public void back_stmt()
-    {
+        }
+        else Error("back_r not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
 
     }
 
-    public void exp()
+    public void exp() throws CodeException
     {
-
+        //exp -> simple_exp {comparison_op simple_exp}
+        //comparison_op -> <|=|>
+        int temp=simple_exp();
+        while(cur.word.equals("=")||cur.word.equals("<")||cur.word.equals(">"))
+        {
+            char compare=cur.word.charAt(0);
+            match("character");
+            int temp1=simple_exp();
+            switch(compare)
+            {
+                case'=':
+                    if (temp==temp1) {
+                        temp=1;
+                    }
+                    else temp=0;
+                    break;
+                case'<':
+                    if (temp<temp1) {
+                        temp=1;
+                    }
+                    else temp=0;
+                    break;
+                case'>':
+                    if (temp>temp1) {
+                        temp=1;
+                    }
+                    else temp=0;
+                    break;
+            }
+        }
+        return temp;
     }
 
-    public void comparison_op()
-    {
 
+    public int simple_exp() throws CodeException
+    {
+        // simple_exp -> term { addop term}
+        // addop -> +|-
+        int temp=term();
+        while(cur.word.equals("-")||cur.word.equals("+"))
+        {
+            char c=cur.word.charAt(0);
+            match("character");
+            switch(c)
+            {
+                case'-':temp=temp-term();break;
+                case'+':temp=temp+term();break;
+            }
+        }
+        return temp;
     }
 
-    public void simple_exp()
+    public int term() throws CodeException
     {
-
+        // term -> factor {mulop factor}
+        // mulop -> *|/
+        int temp=factor();
+        while(cur.word.equals("*")||cur.word.equals("/"))
+        {
+            char c=cur.word.charAt(0);
+            match("character");
+            switch(c)
+            {
+                case'*':temp=temp*term();break;
+                case'/':temp=temp/term();break;
+            }
+        }
+        return temp;
     }
 
-    public void addop()
+
+    public int factor()
     {
-
-    }
-
-    public void term()
-    {
-
-    }
-
-    public void mulop()
-    {
-
-    }
-
-    public void factor()
-    {
-
+         //factor -> (exp)|number|identifier|RANDOM|HISTORY_CALL
+        
     }
 
     public void HISTORY_CALL()
