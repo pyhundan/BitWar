@@ -20,6 +20,7 @@ public class BattleUI extends JFrame{
 
     private JMenuItem start_item;
     private JMenuItem setting_item;
+    private JMenuItem add_item;
     private JMenuItem detial_item;
     private JMenuItem quit_item;
     private JMenuItem about_item;
@@ -61,6 +62,13 @@ public class BattleUI extends JFrame{
                 setSetting();
             }
         });
+        add_item=new JMenuItem("添加策略");
+        add_item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addUsers();
+            }
+        });
         detial_item=new JMenuItem("对战细节");
         detial_item.addActionListener(new ActionListener() {
             @Override
@@ -70,40 +78,7 @@ public class BattleUI extends JFrame{
                     JOptionPane.showMessageDialog(null,"请点击设置选择策略");
                 }
                 else {
-                    String[] snames = new String[battler.size()];
-                    for (int i = 0; i < battler.size(); i++) {
-                        snames[i] = battler.get(i).name;
-                    }
-                    JFrame seach = new JFrame("详细对战结果");
-                    JComboBox cb1 = new JComboBox(snames);
-                    JComboBox cb2 = new JComboBox(snames);
-                    JTextField vs = new JTextField("vs");
-                    JButton yes = new JButton("确定");
-
-                    yes.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            String a1 = (String) cb1.getSelectedItem();
-                            String a2 = (String) cb2.getSelectedItem();
-                            if (a1 == null || a2 == null) {
-                                JOptionPane.showMessageDialog(null, "选择");
-                            } else if (a1.equals(a2)) {
-                                JOptionPane.showMessageDialog(null, "不能选择一样的策略");
-                            } else {
-                                detailhistory(a1, a2);
-                                seach.dispose();
-                            }
-                        }
-                    });
-                    vs.setEditable(false);
-                    seach.setLayout(new FlowLayout());
-                    seach.add(cb1);
-                    seach.add(vs);
-                    seach.add(cb2);
-                    seach.add(yes);
-                    seach.setVisible(true);
-                    seach.setSize(300, 100);
-                    seach.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                   showdetial();
                 }
             }
         });
@@ -125,6 +100,7 @@ public class BattleUI extends JFrame{
 
         jMenu_op.add(start_item);
         jMenu_op.add(setting_item);
+        jMenu_op.add(add_item);
         jMenu_op.add(detial_item);
         jMenu_op.add(quit_item);
         jMenu_about.add(about_item);
@@ -226,101 +202,7 @@ public class BattleUI extends JFrame{
             setUsers.add(jCheckBox);
             base.addLast(jCheckBox);
         }
-        JButton add=new JButton("添加");
-        add.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame addbase=new JFrame("添加");
-                JTextField name=new JTextField("名字",5);
-                JTextField input_name=new JTextField(10);
-                name.setEditable(false);
-                JTextArea input_base=new JTextArea();
-                input_base.setEditable(true);
-                JButton save=new JButton("保存");
-                save.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        String s=input_base.getText();
-                        Users cur=new Users();
-                        cur.name=input_name.getText();
-                        cur.wordAnalyze=new WordAnalyze(s);
-                        cur.stateAnalyze=new StateAnalyze((LinkedList<Toke>)cur.wordAnalyze.analyse());
-                        cur.stateAnalyze.start_analyse();
-                        if (cur.stateAnalyze.fail==null)
-                        {
-                            users.addLast(cur);
-                            JOptionPane.showMessageDialog(null,"保存成功");
-                            addbase.dispose();
-                        }
-                        else
-                        {
-                            JOptionPane.showMessageDialog(null,"保存失败!\n"+cur.stateAnalyze.fail);
-                        }
-                    }
-                });
-                JButton local_save=new JButton("保存到本地");
-                local_save.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        String s=input_base.getText();
-                        Users cur=new Users();
-                        cur.name=input_name.getText();
-                        cur.wordAnalyze=new WordAnalyze(s);
-                        cur.stateAnalyze=new StateAnalyze((LinkedList<Toke>)cur.wordAnalyze.analyse());
-                        cur.stateAnalyze.start_analyse();
-                        if (cur.stateAnalyze.fail==null)
-                        {
-                            users.addLast(cur);
-                            try {
-                                File file=new File(cur.name+".txt");
-                                file.createNewFile();
-                                BufferedWriter bw=new BufferedWriter(new FileWriter(file));
-                                bw.write(s);
-                                bw.close();
-                                JOptionPane.showMessageDialog(null,"成功");
-                                addbase.dispose();
 
-                            }
-                            catch (Exception exc)
-                            {
-                                exc.printStackTrace();
-                            }
-                        }
-                        else
-                        {
-                            JOptionPane.showMessageDialog(null,"保存失败\n"+cur.stateAnalyze.fail);
-                        }
-                    }
-                });
-                JButton cancel=new JButton("取消");
-                cancel.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        addbase.dispose();
-                    }
-                });
-                JPanel buttonPanel=new JPanel();
-                buttonPanel.add(save);
-                buttonPanel.add(local_save);
-                buttonPanel.add(cancel);
-
-                JPanel namePanel=new JPanel();
-                namePanel.add(name);
-                namePanel.add(input_name);
-
-                addbase.add(namePanel);
-                addbase.add(input_base);
-                addbase.add(buttonPanel);
-
-                Container c = addbase.getContentPane();
-                c.setLayout(new BoxLayout(c,BoxLayout.Y_AXIS));
-                addbase.setSize(500,400);
-                addbase.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                addbase.setVisible(true);
-
-            }
-        });
-        setUsers.add(add);
         JButton enter=new JButton("确认");
         enter.addActionListener(new ActionListener() {
             @Override
@@ -479,7 +361,132 @@ public class BattleUI extends JFrame{
         showdetial.add(jScrollPane);
         showdetial.validate();
     }
+    public void addUsers()
+    {
+        JFrame addbase=new JFrame("添加");
+        JTextField name=new JTextField("名字",5);
+        JTextField input_name=new JTextField(10);
+        name.setEditable(false);
+        JTextArea input_base=new JTextArea();
+        input_base.setEditable(true);
+        String s=input_base.getText();
+        Users cur=new Users();
+        //进行词法语法分析
+        cur.name=input_name.getText();
+        cur.wordAnalyze=new WordAnalyze(s);
+        cur.stateAnalyze=new StateAnalyze((LinkedList<Toke>)cur.wordAnalyze.analyse());
+        cur.stateAnalyze.start_analyse();
 
+        JButton save=new JButton("保存");
+        save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if (cur.stateAnalyze.fail==null)
+                {
+                    users.addLast(cur);
+                    JOptionPane.showMessageDialog(null,"保存成功");
+                    addbase.dispose();
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(null,"保存失败!\n"+"原因："+cur.stateAnalyze.fail);
+                }
+            }
+        });
+        JButton local_save=new JButton("保存到本地");
+        local_save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (cur.stateAnalyze.fail==null)
+                {
+                    users.addLast(cur);
+                    try {
+                        File file=new File(cur.name+".txt");
+                        file.createNewFile();
+                        BufferedWriter bw=new BufferedWriter(new FileWriter(file));
+                        bw.write(s);
+                        bw.close();
+                        JOptionPane.showMessageDialog(null,"成功");
+                        addbase.dispose();
+
+                    }
+                    catch (Exception exc)
+                    {
+                        exc.printStackTrace();
+                    }
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(null,"保存失败\n"+"原因："+cur.stateAnalyze.fail);
+                }
+            }
+        });
+        JButton cancel=new JButton("取消");
+        cancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addbase.dispose();
+            }
+        });
+        JPanel buttonPanel=new JPanel();
+        buttonPanel.add(save);
+        buttonPanel.add(local_save);
+        buttonPanel.add(cancel);
+
+        JPanel namePanel=new JPanel();
+        namePanel.add(name);
+        namePanel.add(input_name);
+
+        addbase.add(namePanel);
+        addbase.add(input_base);
+        addbase.add(buttonPanel);
+
+        Container c = addbase.getContentPane();
+        c.setLayout(new BoxLayout(c,BoxLayout.Y_AXIS));
+        addbase.setSize(500,400);
+        addbase.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addbase.setVisible(true);
+
+    }
+
+    public void showdetial()
+    {
+        String[] snames = new String[battler.size()];
+        for (int i = 0; i < battler.size(); i++) {
+            snames[i] = battler.get(i).name;
+        }
+        JFrame seach = new JFrame("详细对战结果");
+        JComboBox cb1 = new JComboBox(snames);
+        JComboBox cb2 = new JComboBox(snames);
+        JTextField vs = new JTextField("vs");
+        JButton yes = new JButton("确定");
+
+        yes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String a1 = (String) cb1.getSelectedItem();
+                String a2 = (String) cb2.getSelectedItem();
+                if (a1 == null || a2 == null) {
+                    JOptionPane.showMessageDialog(null, "选择");
+                } else if (a1.equals(a2)) {
+                    JOptionPane.showMessageDialog(null, "不能选择一样的策略");
+                } else {
+                    detailhistory(a1, a2);
+                    seach.dispose();
+                }
+            }
+        });
+        vs.setEditable(false);
+        seach.setLayout(new FlowLayout());
+        seach.add(cb1);
+        seach.add(vs);
+        seach.add(cb2);
+        seach.add(yes);
+        seach.setVisible(true);
+        seach.setSize(400, 100);
+        seach.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    }
     public String getFile(String filepath)
     {
         String a="";

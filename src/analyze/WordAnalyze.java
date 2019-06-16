@@ -38,7 +38,6 @@ public class WordAnalyze {
     final static int LETTER=0;
     final static int NUMBER=1;
     final static int CHAR=2;
-    final static int SYSTEM=3;
     final static int START=-1;
 
     public static HashSet<String> reserer=new HashSet<>();

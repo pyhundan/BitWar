@@ -82,7 +82,6 @@ public class StateAnalyze {
             fail=e.message;
         }
     }
-
     public void stmt_seq() throws CodeException
     {
         String word=tok.word;
@@ -97,7 +96,6 @@ public class StateAnalyze {
         }
         else Error("stmt_seq not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
     }
-
     public void statement() throws CodeException
     {
         String word=tok.word;
@@ -119,7 +117,6 @@ public class StateAnalyze {
         }
         else Error("statement not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
     }
-
     public void if_stmt() throws CodeException
     {
         match("if");
@@ -165,7 +162,6 @@ public class StateAnalyze {
         }
         match("end");
     }
-
     public void repeat_stmt() throws CodeException
     {
         match("repeat");
@@ -189,7 +185,6 @@ public class StateAnalyze {
         match("}");
         match("endrepeat");
     }
-
     public void assign_stmt() throws CodeException
     {
         String temp=tok.word;
@@ -199,7 +194,6 @@ public class StateAnalyze {
         int temp1=simple_exp();
         identifier.put(temp,temp1);
     }
-
     public void back_stmt() throws CodeException
     {
         match("back");
@@ -224,7 +218,6 @@ public class StateAnalyze {
         else Error("back not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
 
     }
-
     public int exp() throws CodeException
     {
         int temp=simple_exp();
@@ -251,7 +244,6 @@ public class StateAnalyze {
         }
         return temp;
     }
-
     public int simple_exp() throws CodeException
     {
         int temp=term();
@@ -268,8 +260,6 @@ public class StateAnalyze {
         return temp;
 
     }
-
-
     public int term() throws CodeException
     {
         int temp=factor();
@@ -285,8 +275,6 @@ public class StateAnalyze {
         }
         return temp;
     }
-
-
 
     public int factor() throws CodeException
     {
@@ -324,7 +312,6 @@ public class StateAnalyze {
         else Error("not a factor! (index:"+(index-1)+",line:"+tok.line+")"+tok.word);
         return temp;
     }
-
     public int HISTORY_CALL() throws CodeException
     {
         match("HISTORY");
@@ -338,7 +325,6 @@ public class StateAnalyze {
         else return (history.result.get(temp))[oppenent];
 
     }
-
     private int findright(int curindex){
         int temp = curindex;
         Toke t = tokes.get(curindex);
@@ -350,13 +336,12 @@ public class StateAnalyze {
         }
         return temp;
     }
-
-
-    public static void main(String args[]){
-
-        Users users=new Users("随机1.txt");
-        System.out.println(users.wordAnalyze.tokes);
-        users.stateAnalyze.start_analyse();
-
-    }
+//测试
+//    public static void main(String args[]){
+//
+//        Users users=new Users("随机1.txt");
+//        System.out.println(users.wordAnalyze.tokes);
+//        users.stateAnalyze.start_analyse();
+//
+//    }
 }
