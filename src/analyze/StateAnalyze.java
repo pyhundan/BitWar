@@ -1,57 +1,37 @@
 package analyze;
 
-import com.sun.tools.javac.jvm.Code;
 import error.CodeException;
+import modle.Users;
 
-import javax.swing.*;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
-
-
-/*
-    文法规则：
-
-    stmt_seq -> statement { ; statement }
-    statement -> if_stmt|repeat_stmt|assign_stmt |back_stmt
-    if_stmt -> if(exp)then '{' stmt_seq'}' {else '{'stmt_seq'}'} end
-    repeat_stmt -> repeat(exp) '{'stmt_seq'}' end repeat
-    assign_stmt -> identifier:=exp
-    back_stmt -> back(identifier|number) //返回语句
-    exp -> simple_exp {comparison_op simple_exp}
-    comparison_op -> <|=|>
-    simple_exp -> term { addop term}
-    addop -> +|-
-    term -> factor {mulop factor}
-    mulop -> *|/
-    factor -> (exp)|number|identifier|RANDOM|HISTORY_CALL
-    HISTORY_CALL -> HISTORY[simple_exp]
-    RANDOM -> (random)
-
- */
 
 public class StateAnalyze {
 
     String fail;
 
-    public LinkedList<Token> tokens;
-    public Token tok;
+    public LinkedList<Toke> tokes;
+    public Toke tok;
     public int index;
     public HashMap<String,Integer> identifier;
     public int back;
     public boolean backflag;
-  //  public BattleHistory battleHistory
-    //public int oppenent;
-    //public void setBattleHistory(){};
+    public History history;
+    public int oppenent;
+
+    public void setHistory(History history,int op){
+        this.history=history;
+        oppenent=op;
+    }
 
     //构建标识符列表
-    public StateAnalyze(LinkedList<Token> list)
+    public StateAnalyze(LinkedList<Toke> list)
     {
-        this.tokens=list;
+        this.tokes =list;
         identifier=new HashMap<>();
-        for(int i=0;i<tokens.size();i++)
+        for(int i = 0; i< tokes.size(); i++)
         {
-            Token temp=tokens.get(i);
+            Toke temp= tokes.get(i);
             if(temp.type.equals("identifier"))
             {
                 identifier.put(temp.word,0);
@@ -59,13 +39,13 @@ public class StateAnalyze {
         }
     }
     //递归下降分析方法
-
     //随机数
     public int random() throws CodeException
     {
        match("RANDOM");
        match("(");
-       int temp=(int)(Math.random());
+       int a=simple_exp()+1;
+       int temp=(int)(Math.random()*a);
        match(")");
        return temp;
     }
@@ -80,13 +60,13 @@ public class StateAnalyze {
     {
         if(tok.word.equals(a)||tok.type.equals(a))
         {
-            if (index<tokens.size())
+            if (index< tokes.size())
             {
-                tok=tokens.get(index++);
+                tok= tokes.get(index++);
             }
         }
         else{
-            Error("wrong word! expected "+a+"actual:"+tok.word+"index:"+(index-1)+";line"+tok.line);
+            Error("wrong word! expected："+a+" actually:"+tok.word+"index:"+(index-1)+";line"+tok.line);
         }
     }
     public void start_analyse()
@@ -94,9 +74,8 @@ public class StateAnalyze {
         index=0;
         backflag=true;
         back=0;
-
         try {
-            tok=tokens.get(index++);
+            tok= tokes.get(index++);
             stmt_seq();
         }catch (CodeException e)
         {
@@ -107,7 +86,7 @@ public class StateAnalyze {
     public void stmt_seq() throws CodeException
     {
         String word=tok.word;
-        if(word.equals("if")||word.equals("repeat")||word.equals("back")||word.equals("identifier"))
+        if(word.equals("if")||word.equals("repeat")||word.equals("back")||tok.type.equals("identifier"))
         {
             statement();
             while (tok.word.equals(";"))
@@ -122,7 +101,6 @@ public class StateAnalyze {
     public void statement() throws CodeException
     {
         String word=tok.word;
-
         if (word.equals("if"))
         {
             if_stmt();
@@ -135,12 +113,11 @@ public class StateAnalyze {
         {
             back_stmt();
         }
-        else if (word.equals("identifier"))
+        else if (tok.type.equals("identifier"))
         {
             assign_stmt();
         }
         else Error("statement not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
-
     }
 
     public void if_stmt() throws CodeException
@@ -149,21 +126,25 @@ public class StateAnalyze {
         match("(");
         int flag=exp();
         match(")");
+       // match("then");
         match("{");
         if (flag==1)
         {
+
             stmt_seq();
         }
         else
         {
-            Token t=tok;
+
+            Toke t=tok;
+            //System.out.println(t.word);
             int i=index;
-            while(t.word.equals("}"))
+            while(!t.word.equals("}"))
             {
                 if (t.word.equals("{")) {
                     //match("{");
                 }
-                t=tokens.get(i++);
+                t= tokes.get(i++);
             }
             tok=t;
             index=i;
@@ -175,7 +156,7 @@ public class StateAnalyze {
             if (flag==1)
             {
                 index=findright(index-1);
-                tok=tokens.get(index++);
+                tok= tokes.get(index++);
             }
             else{
                 stmt_seq();
@@ -187,7 +168,7 @@ public class StateAnalyze {
 
     public void repeat_stmt() throws CodeException
     {
-        match("for");
+        match("repeat");
         match("(");
         int exp_index=index-1;
         int temp=exp();
@@ -198,16 +179,15 @@ public class StateAnalyze {
         while (temp==1){
             stmt_seq();
             index=exp_index;
-            tok=tokens.get(index++);
+            tok= tokes.get(index++);
             temp=exp();
             index=spin_index;
-            tok=tokens.get(index++);
+            tok= tokes.get(index++);
         }
         index=spined_index;
-        tok=tokens.get(index++);
+        tok= tokes.get(index++);
         match("}");
-        match("end");
-        match("for");
+        match("endrepeat");
     }
 
     public void assign_stmt() throws CodeException
@@ -278,6 +258,7 @@ public class StateAnalyze {
         while(tok.word.equals("-")||tok.word.equals("+"))
         {
             char c=tok.word.charAt(0);
+            match("character");
             switch (c)
             {
                 case '-':temp=temp-term();break;
@@ -291,15 +272,15 @@ public class StateAnalyze {
 
     public int term() throws CodeException
     {
-
-        int temp=term();
+        int temp=factor();
         while(tok.word.equals("*")||tok.word.equals("/"))
         {
             char c=tok.word.charAt(0);
+            match("character");
             switch (c)
             {
                 case '*':temp=temp*term();break;
-                case '?':temp=temp/term();break;
+                case '/':temp=temp/term();break;
             }
         }
         return temp;
@@ -316,12 +297,12 @@ public class StateAnalyze {
             temp=simple_exp();
             match(")");
         }
-        else if (tok.word.equals("number"))
+        else if (tok.type.equals("number"))
         {
             temp=Integer.parseInt(tok.word);
             match("number");
         }
-        else if (tok.word.equals("identifier"))
+        else if (tok.type.equals("identifier"))
         {
             temp=identifier.get(tok.word);
             match("identifier");
@@ -331,33 +312,51 @@ public class StateAnalyze {
                 temp=random();
             }
             else if (tok.word.equals("LATEST")){
-
+                if (history==null) {temp=-1;}
+                else{ temp=history.result.size()-1;}
+                System.out.println("LATEST="+temp);
                 match("LATEST");
             }
-        }
-        else Error("not a factor! (index:"+(index-1)+",line:"+tok.line+")");
-        return temp;
-    }
-
-    public void HISTORY_CALL() throws CodeException
-    {
-
-    }
-
-    private int findright(int index)
-    {
-        int temp=index;
-        Token t=tokens.get(index);
-        while(!t.word.equals("}"))
-        {
-            if (t.word.equals("{"))
-            {
-                temp=findright(temp+1);
+            else {
+                temp=HISTORY_CALL();
             }
-            t=tokens.get(++temp);
+        }
+        else Error("not a factor! (index:"+(index-1)+",line:"+tok.line+")"+tok.word);
+        return temp;
+    }
+
+    public int HISTORY_CALL() throws CodeException
+    {
+        match("HISTORY");
+        match("[");
+        int temp=simple_exp();
+        match("]");
+        if (history==null)
+        {
+            return 0;
+        }
+        else return (history.result.get(temp))[oppenent];
+
+    }
+
+    private int findright(int curindex){
+        int temp = curindex;
+        Toke t = tokes.get(curindex);
+        while(!t.word.equals("}")){
+            if(t.word.equals("{")){
+                temp = findright(temp+1);
+            }
+            t = tokes.get(++temp);
         }
         return temp;
     }
 
 
+    public static void main(String args[]){
+
+        Users users=new Users("随机1.txt");
+        System.out.println(users.wordAnalyze.tokes);
+        users.stateAnalyze.start_analyse();
+
+    }
 }

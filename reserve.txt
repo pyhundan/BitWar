@@ -1,7 +1,0 @@
-if
-then
-else
-operate
-for
-feedback
-done

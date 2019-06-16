@@ -1,8 +1,0 @@
-i: RANDOM(9).
-if(i>6){
-	feedback 1
-}
-else{
-	feedback 0
-}
-done
