@@ -49,7 +49,7 @@ public class BattleUI extends JFrame{
                 {
                     JOptionPane.showMessageDialog(null,"请点击设置选择策略");
                 }
-                else beginwar();
+                else startgame();
             }
         });
 
@@ -144,7 +144,7 @@ public class BattleUI extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    public void beginwar()
+    public void startgame()
     {
         histories.clear();
         int number=battler.size();
@@ -178,7 +178,7 @@ public class BattleUI extends JFrame{
                 histories.addLast(tempArray);
             }
         }
-        dohistory();
+        tohistory();
     }
     public void setSetting() {
         JFrame set=new JFrame("设置");
@@ -283,7 +283,7 @@ public class BattleUI extends JFrame{
 
     }
     //对战的历史记录
-    public void dohistory(){
+    public void tohistory(){
         DefaultTableModel defaultTableModel=new DefaultTableModel();
         JTable jTable=new JTable(defaultTableModel);
         JScrollPane jScrollPane=new JScrollPane(jTable);
@@ -361,6 +361,7 @@ public class BattleUI extends JFrame{
         showdetial.add(jScrollPane);
         showdetial.validate();
     }
+
     public void addUsers()
     {
         JFrame addbase=new JFrame("添加");
@@ -370,27 +371,27 @@ public class BattleUI extends JFrame{
         JTextArea input_base=new JTextArea();
         input_base.setEditable(true);
         String s=input_base.getText();
-        Users cur=new Users();
+
+
         //进行词法语法分析
-        cur.name=input_name.getText();
-        cur.wordAnalyze=new WordAnalyze(s);
-        cur.stateAnalyze=new StateAnalyze((LinkedList<Toke>)cur.wordAnalyze.analyse());
-        cur.stateAnalyze.start_analyse();
+       String title=input_name.getText();
 
         JButton save=new JButton("保存");
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (cur.stateAnalyze.fail_message ==null)
+                Users user=new Users();
+                setUser(user,title,s);
+                if (user.stateAnalyze.fail_message ==null)
                 {
-                    users.addLast(cur);
+                    users.addLast(user);
                     JOptionPane.showMessageDialog(null,"保存成功");
                     addbase.dispose();
                 }
                 else
                 {
-                    JOptionPane.showMessageDialog(null,"保存失败!\n"+"原因："+cur.stateAnalyze.fail_message);
+                    JOptionPane.showMessageDialog(null,"保存失败!\n"+"原因："+user.stateAnalyze.fail_message);
                 }
             }
         });
@@ -398,11 +399,13 @@ public class BattleUI extends JFrame{
         local_save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (cur.stateAnalyze.fail_message ==null)
+                Users user=new Users();
+                setUser(user,title,s);
+                if (user.stateAnalyze.fail_message ==null)
                 {
-                    users.addLast(cur);
+                    users.addLast(user);
                     try {
-                        File file=new File(cur.name+".txt");
+                        File file=new File("src/"+user.name+".txt");
                         file.createNewFile();
                         BufferedWriter bw=new BufferedWriter(new FileWriter(file));
                         bw.write(s);
@@ -418,7 +421,7 @@ public class BattleUI extends JFrame{
                 }
                 else
                 {
-                    JOptionPane.showMessageDialog(null,"保存失败\n"+"原因："+cur.stateAnalyze.fail_message);
+                    JOptionPane.showMessageDialog(null,"保存失败\n"+"原因："+user.stateAnalyze.fail_message);
                 }
             }
         });
@@ -429,6 +432,7 @@ public class BattleUI extends JFrame{
                 addbase.dispose();
             }
         });
+
         JPanel buttonPanel=new JPanel();
         buttonPanel.add(save);
         buttonPanel.add(local_save);
@@ -447,7 +451,6 @@ public class BattleUI extends JFrame{
         addbase.setSize(500,400);
         addbase.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         addbase.setVisible(true);
-
     }
 
     public void showdetial()
@@ -491,7 +494,7 @@ public class BattleUI extends JFrame{
     {
         String a="";
         try {
-            BufferedReader bufferedReader=new BufferedReader(new FileReader(filepath));
+            BufferedReader bufferedReader=new BufferedReader(new FileReader("src/"+filepath));
             String temp=bufferedReader.readLine();
             while(temp!=null)
             {
@@ -504,5 +507,13 @@ public class BattleUI extends JFrame{
             e.printStackTrace();
         }
         return a;
+    }
+    public void setUser(Users user,String name,String s)
+    {
+        user.name=name;
+        user.wordAnalyze=new WordAnalyze(s);
+        user.stateAnalyze=new StateAnalyze((LinkedList<Toke>)user.wordAnalyze.analyse());
+        user.stateAnalyze.start_analyse();
+
     }
 }

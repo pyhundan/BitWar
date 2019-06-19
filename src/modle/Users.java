@@ -14,7 +14,7 @@ public class Users {
     public Users(String filepath)
     {
         try {
-            BufferedReader bufferedReader=new BufferedReader(new FileReader(filepath));
+            BufferedReader bufferedReader=new BufferedReader(new FileReader("src/"+filepath));
             StringBuffer stringBuffer=new StringBuffer();
             String line=bufferedReader.readLine();
             while(line!=null)

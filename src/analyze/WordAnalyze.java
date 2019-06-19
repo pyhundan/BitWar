@@ -26,7 +26,7 @@ public class WordAnalyze {
 
     public WordAnalyze(String s){
         try {
-            BufferedReader bufferedReader=new BufferedReader(new FileReader("test.txt"));
+            BufferedReader bufferedReader=new BufferedReader(new FileReader("src/"+"test.txt"));
             String temp=bufferedReader.readLine();
             while(temp!=null)
             {

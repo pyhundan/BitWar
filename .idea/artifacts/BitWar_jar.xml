@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="BitWar:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BitWar_jar</output-path>
+    <root id="root">
+      <element id="archive" name="BitWar.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/resources/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="BitWar" />
+      </element>
+      <element id="directory" name="libs" />
+    </root>
+  </artifact>
+</component>
