@@ -7,30 +7,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-class Toke {
-    //public static int no=0;
-
-    int number;
-    String word;
-    String type;
-    int line;
-
-    public Toke(int n, int l)
-    {
-        this.number=n;
-        this.line=l;
-    }
-
-    @Override
-    public String toString() {
-        return number+"+"+word+"+"+type+'\n';
-    }
-}
 //词法分析器
 public class WordAnalyze {
 
     public LinkedList<Toke> tokes;
-    public String source;
+    public String save;
 
     int no;
     int line;
@@ -40,8 +21,8 @@ public class WordAnalyze {
     final static int CHAR=2;
     final static int START=-1;
 
-    public static HashSet<String> reserer=new HashSet<>();
-
+    public static HashSet<String> reserver =new HashSet<>();
+    //保存关键字
 
     public WordAnalyze(String s){
         try {
@@ -49,7 +30,7 @@ public class WordAnalyze {
             String temp=bufferedReader.readLine();
             while(temp!=null)
             {
-                reserer.add(temp.trim());
+                reserver.add(temp.trim());
                 temp=bufferedReader.readLine();
             }
         }
@@ -57,7 +38,7 @@ public class WordAnalyze {
         {
             e.printStackTrace();
         }
-        source=s;
+        save =s;
         tokes =new LinkedList<>();
         no=0;
         line=1;
@@ -77,33 +58,32 @@ public class WordAnalyze {
         int index=0;
         int state=0;
         String temp="";
-
-        while(index<source.length())
+        while(index< save.length())
         {
-            char cur=source.charAt(index);
+            char cur= save.charAt(index);
             if (state==START)
             {
                 state=getWhat(cur);
             }
             switch (state)
             {
-                case LETTER:
-                    if (Character.isAlphabetic(cur))
+                case LETTER://扫描到字母
+                    if (Character.isAlphabetic(cur))//继续扫描
                     {
                         temp=temp+cur;
-                        cur=source.charAt(index++);
+                        cur= save.charAt(index++);
                         continue;
                     }
                     else{
                         Toke t=new Toke(no++,line);
                         t.word=temp;
-                        if (reserer.contains(temp))
+                        if (reserver.contains(temp))
                         {
                             t.type="reserve";
                         }
                         else if (temp.equals("RANDOM")||temp.equals("HISTORY")||temp.equals("LATEST"))
                         {
-                            t.type="system";
+                            t.type="mine";
                         }
                         else t.type="identifier";
                         tokes.addLast(t);
@@ -111,11 +91,11 @@ public class WordAnalyze {
                         state=START;
                     }
                     break;
-                case NUMBER:
-                    if (cur>='0'&&cur<='9')
+                case NUMBER://扫描到数字
+                    if (cur>='0'&&cur<='9')//继续扫描
                     {
                         temp=temp+cur;
-                        cur=source.charAt(index++);
+                        cur= save.charAt(index++);
                         continue;
                     }
                     else{

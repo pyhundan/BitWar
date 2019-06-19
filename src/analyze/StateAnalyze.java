@@ -1,29 +1,26 @@
 package analyze;
 
 import error.CodeException;
-import modle.Users;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 
 public class StateAnalyze {
 
-    String fail;
+    String fail_message;
 
-    public LinkedList<Toke> tokes;
     public Toke tok;
+    public LinkedList<Toke> tokes;
     public int index;
     public HashMap<String,Integer> identifier;
-    public int back;
+    public int back;//返回值
     public boolean backflag;
-    public History history;
-    public int oppenent;
-
-    public void setHistory(History history,int op){
-        this.history=history;
-        oppenent=op;
+    public Array array;
+    public int under;
+    public void setArray(Array array, int op){
+        this.array = array;
+        under =op;
     }
-
     //构建标识符列表
     public StateAnalyze(LinkedList<Toke> list)
     {
@@ -66,7 +63,7 @@ public class StateAnalyze {
             }
         }
         else{
-            Error("wrong word! expected："+a+" actually:"+tok.word+"index:"+(index-1)+";line"+tok.line);
+            Error("wrong word! need："+a+" but word is:"+tok.word+"index:"+(index-1)+";line"+tok.line);
         }
     }
     public void start_analyse()
@@ -79,7 +76,7 @@ public class StateAnalyze {
             stmt_seq();
         }catch (CodeException e)
         {
-            fail=e.message;
+            fail_message =e.message;
         }
     }
     public void stmt_seq() throws CodeException
@@ -94,7 +91,7 @@ public class StateAnalyze {
                 statement();
             }
         }
-        else Error("stmt_seq not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
+        else Error("stmt_seq error! (index :"+(index-1)+",line :"+tok.line+")");
     }
     public void statement() throws CodeException
     {
@@ -115,7 +112,7 @@ public class StateAnalyze {
         {
             assign_stmt();
         }
-        else Error("statement not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
+        else Error("statement error! (index :"+(index-1)+",line :"+tok.line+")");
     }
     public void if_stmt() throws CodeException
     {
@@ -125,14 +122,10 @@ public class StateAnalyze {
         match(")");
        // match("then");
         match("{");
-        if (flag==1)
-        {
-
+        if (flag==1) {
             stmt_seq();
         }
-        else
-        {
-
+        else {
             Toke t=tok;
             //System.out.println(t.word);
             int i=index;
@@ -215,7 +208,7 @@ public class StateAnalyze {
             }
             match("number");
         }
-        else Error("back not corresponding! (index :"+(index-1)+",line :"+tok.line+")");
+        else Error("back error! (index :"+(index-1)+",line :"+tok.line+")");
 
     }
     public int exp() throws CodeException
@@ -275,7 +268,6 @@ public class StateAnalyze {
         }
         return temp;
     }
-
     public int factor() throws CodeException
     {
         int temp=0;
@@ -295,13 +287,13 @@ public class StateAnalyze {
             temp=identifier.get(tok.word);
             match("identifier");
         }
-        else if (tok.type.equals("system")){
+        else if (tok.type.equals("mine")){
             if (tok.word.equals("RANDOM")){
                 temp=random();
             }
             else if (tok.word.equals("LATEST")){
-                if (history==null) {temp=-1;}
-                else{ temp=history.result.size()-1;}
+                if (array ==null) {temp=-1;}
+                else{ temp= array.result.size()-1;}
                 System.out.println("LATEST="+temp);
                 match("LATEST");
             }
@@ -318,11 +310,11 @@ public class StateAnalyze {
         match("[");
         int temp=simple_exp();
         match("]");
-        if (history==null)
+        if (array ==null)
         {
             return 0;
         }
-        else return (history.result.get(temp))[oppenent];
+        else return (array.result.get(temp))[under];
 
     }
     private int findright(int curindex){
@@ -344,4 +336,25 @@ public class StateAnalyze {
 //        users.stateAnalyze.start_analyse();
 //
 //    }
+
+//    文法规则：
+//    stmt_seq -> statement { ; statement }
+//    statement -> if_stmt|repeat_stmt|assign_stmt |back_stmt
+//    if_stmt -> if(exp)then '{' stmt_seq'}' {else '{'stmt_seq'}'} end
+//    repeat_stmt -> repeat(exp) '{'stmt_seq'}' endrepeat
+//    assign_stmt -> identifier:=exp
+//    back_stmt -> back(identifier|number)
+//    exp -> simple_exp {comparison_op simple_exp}
+//    comparison_op -> <|=|>
+//    simple_exp -> term { addop term}
+//    addop -> +|-
+//    term -> factor {mulop factor}
+//    mulop -> *|/
+//    factor -> (exp)|number|identifier|RANDOM|HISTORY_CALL
+//    HISTORY_CALL -> HISTORY[simple_exp]
+//    RANDOM -> (random)
+
+
+
+
 }

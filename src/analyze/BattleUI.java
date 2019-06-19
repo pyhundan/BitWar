@@ -26,7 +26,7 @@ public class BattleUI extends JFrame{
     private JMenuItem about_item;
     LinkedList<Users> users=new LinkedList<>();//存储存在策略
     LinkedList<Users> battler=new LinkedList<>();//存储选择的策略
-    LinkedList<History> histories=new LinkedList<>();//历史记录
+    LinkedList<Array> histories=new LinkedList<>();//历史记录
     String rule="";
     int rounds=5;
     boolean flag=false;
@@ -154,9 +154,9 @@ public class BattleUI extends JFrame{
             for(int j=i+1;j<number;j++)
             {
                 Users col=battler.get(j);
-                History temphistory=new History(row,col);
-                row.stateAnalyze.setHistory(temphistory,1);
-                col.stateAnalyze.setHistory(temphistory,0);
+                Array tempArray=new Array(row,col);
+                row.stateAnalyze.setArray(tempArray,1);
+                col.stateAnalyze.setArray(tempArray,0);
                 int rowdecide,coldecide;
                 for(int k=0;k<rounds;k++)
                 {
@@ -167,15 +167,15 @@ public class BattleUI extends JFrame{
                     Integer [] result=new Integer[4];
                     result[0]=rowdecide;//判断是否合作
                     result[1]=coldecide;
-                    result[2]=History.s1[rowdecide][coldecide];//本轮获得的分数
-                    result[3]=History.s2[rowdecide][coldecide];
-                    temphistory.s1_time=temphistory.s1_time+result[0];
-                    temphistory.s2_time=temphistory.s2_time+result[1];
-                    temphistory.s1_sum=temphistory.s1_sum+result[2];
-                    temphistory.s2_sum=temphistory.s2_sum+result[3];
-                    temphistory.result.addLast(result);
+                    result[2]= Array.s1[rowdecide][coldecide];//本轮获得的分数
+                    result[3]= Array.s2[rowdecide][coldecide];
+                    tempArray.s1_time=tempArray.s1_time+result[0];
+                    tempArray.s2_time=tempArray.s2_time+result[1];
+                    tempArray.s1_sum=tempArray.s1_sum+result[2];
+                    tempArray.s2_sum=tempArray.s2_sum+result[3];
+                    tempArray.result.addLast(result);
                 }
-                histories.addLast(temphistory);
+                histories.addLast(tempArray);
             }
         }
         dohistory();
@@ -245,8 +245,8 @@ public class BattleUI extends JFrame{
     //显示历史对战结果
     public void detailhistory(String s1,String s2)
     {
-        History temp=null;
-        for (History s:histories)
+        Array temp=null;
+        for (Array s:histories)
         {
             if (s.ss1.name.equals(s1)||s.ss1.name.equals(s2))
             {
@@ -310,7 +310,7 @@ public class BattleUI extends JFrame{
             int border=battler.size();
             one[temp_index++]=s.name;
             boolean r_or_c;
-            for (History b:histories)
+            for (Array b:histories)
             {
                 if (s==b.ss1)
                 {
@@ -382,7 +382,7 @@ public class BattleUI extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (cur.stateAnalyze.fail==null)
+                if (cur.stateAnalyze.fail_message ==null)
                 {
                     users.addLast(cur);
                     JOptionPane.showMessageDialog(null,"保存成功");
@@ -390,7 +390,7 @@ public class BattleUI extends JFrame{
                 }
                 else
                 {
-                    JOptionPane.showMessageDialog(null,"保存失败!\n"+"原因："+cur.stateAnalyze.fail);
+                    JOptionPane.showMessageDialog(null,"保存失败!\n"+"原因："+cur.stateAnalyze.fail_message);
                 }
             }
         });
@@ -398,7 +398,7 @@ public class BattleUI extends JFrame{
         local_save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (cur.stateAnalyze.fail==null)
+                if (cur.stateAnalyze.fail_message ==null)
                 {
                     users.addLast(cur);
                     try {
@@ -418,7 +418,7 @@ public class BattleUI extends JFrame{
                 }
                 else
                 {
-                    JOptionPane.showMessageDialog(null,"保存失败\n"+"原因："+cur.stateAnalyze.fail);
+                    JOptionPane.showMessageDialog(null,"保存失败\n"+"原因："+cur.stateAnalyze.fail_message);
                 }
             }
         });
